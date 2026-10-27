@@ -85,8 +85,8 @@ class Waktu {
 }
 
 class Person {
-    private String nama;
-    private String alamat;
+    protected String nama;
+    protected String alamat;
 
     public Person(){
         nama = "";
@@ -277,8 +277,8 @@ class Pegawai extends Person {
         System.out.printf("%-3d %-6s %-10s %-10s %-4d %-9s %-9s %-9s %-10s %12s %10s %10s  %-10s%n",
                 no,
                 NIP,
-                getNama(),
-                getAlamat(),
+                nama,
+                alamat,
                 gol,
                 datang.outputWaktu(),
                 pulang.outputWaktu(),

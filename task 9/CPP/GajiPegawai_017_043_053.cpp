@@ -79,7 +79,7 @@ public:
 };
 
 class Person {
-private:
+protected:
     string nama;
     string alamat;
 
@@ -241,8 +241,8 @@ public:
     void output(int no) const {
         cout << left  << setw(3)  << no << ' '
              << setw(6)  << NIP << ' '
-             << setw(10) << getNama() << ' '
-             << setw(10) << getAlamat() << ' '
+             << setw(10) << nama << ' '
+             << setw(10) << alamat << ' '
              << setw(4)  << gol << ' '
              << setw(9)  << datang.outputWaktu() << ' '
              << setw(9)  << pulang.outputWaktu() << ' '
