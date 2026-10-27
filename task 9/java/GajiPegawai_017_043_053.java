@@ -1,5 +1,5 @@
 /*
-Nama Program        : Soal3_017_043_053.cpp
+Nama Program        : Gaji Pegawai
 Nama NPM Anggota 1  : Jasmine Salsabila (140810250017)
 Nama NPM Anggota 2  : Raffa Pasha Hidayat (140810250043)
 Nama NPM Anggota 3  : Asma Hamidah (140810250053)
@@ -604,7 +604,7 @@ class Menu {
     }
 }
 
-public class GajiPegawai {
+public class GajiPegawai_017_043_053 {
     public static void main(String[] args) {
         Menu menu = new Menu();
         menu.run();

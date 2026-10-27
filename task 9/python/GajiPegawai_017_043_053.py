@@ -1,4 +1,4 @@
-# Nama Program        : Soal3_017_043_053.cpp
+# Nama Program        : Gaji Pegawai
 # Nama NPM Anggota 1  : Jasmine Salsabila (140810250017)
 # Nama NPM Anggota 2  : Raffa Pasha Hidayat (140810250043)
 # Nama NPM Anggota 3  : Asma Hamidah (140810250053)
@@ -167,7 +167,7 @@ class Pegawai(Person):
     def output(self, no):
         lama = Waktu.dari_detik(self.lama_kerja()).output_waktu()
         lembur_waktu = Waktu.dari_detik(self.lama_lembur()).output_waktu()
-        print(f"{no:<3} {self._nip:<6} {self.get_nama():<10} {self.get_alamat():<10} {self._gol:<4} "
+        print(f"{no:<3} {self._nip:<6} {self._nama:<10} {self._alamat:<10} {self._gol:<4} "
               f"{self._datang.output_waktu():<9} {self._pulang.output_waktu():<9} "
               f"{lama:<9} {lembur_waktu:<10} "
               f"{Pegawai.format_rupiah(self.get_gaji()):>12} "
