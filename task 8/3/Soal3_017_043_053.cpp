@@ -20,6 +20,10 @@ private:
     int menit;
     int detik;
 
+    static string duaDigit(int nilai) {
+        return (nilai < 10 ? "0" : "") + to_string(nilai);
+    }
+
 public:
     Waktu() {
         jam = 0;
@@ -33,45 +37,46 @@ public:
         this->detik = detik;
     }
 
-    void setJam(int jam) { this->jam = jam; }
-    int getJam() { return jam; }
-
-    void setMenit(int menit) { this->menit = menit; }
-    int getMenit() { return menit; }
-
-    void setDetik(int detik) { this->detik = detik; }
-    int getDetik() { return detik; }
-
-    void input(string label) {
-        cout << "Waktu " << label << " (jam menit detik): ";
-        cin >> jam >> menit >> detik;
+    explicit Waktu(int totalDetik) {
+        this->jam = totalDetik / 3600;
+        this->menit = (totalDetik % 3600) / 60;
+        this->detik = totalDetik % 60;
     }
 
-    int keDetik() {
+    void setJam(int jam) { this->jam = jam; }
+    int getJam() const { return jam; }
+
+    void setMenit(int menit) { this->menit = menit; }
+    int getMenit() const { return menit; }
+
+    void setDetik(int detik) { this->detik = detik; }
+    int getDetik() const { return detik; }
+
+    void inputWaktu() {
+        cout << "Jam           : ";
+        cin >> jam;
+        cout << "Menit         : ";
+        cin >> menit;
+        cout << "Detik         : ";
+        cin >> detik;
+    }
+
+    int toSecond() const {
         return jam * 3600 + menit * 60 + detik;
     }
 
-    // BARU: membuat objek Waktu dari total detik
-    static Waktu dariDetik(int total) {
-        return Waktu(total / 3600, (total % 3600) / 60, total % 60);
-    }
-
-    int selisihDetik(Waktu waktu) {
-        int selisih = waktu.keDetik() - this->keDetik();
+    int selisihWaktu(const Waktu& waktu) const {
+        int selisih = waktu.toSecond() - this->toSecond();
         if (selisih < 0) {
-            selisih += 86400;
+            selisih += 24 * 3600;
         }
         return selisih;
     }
 
-    void output(int lebar) {
-        cout << right << setfill('0') << setw(2) << jam << ":"
-             << setw(2) << menit << ":"
-             << setw(2) << detik << setfill(' ')
-             << setw(lebar - 8) << "";
+    string outputWaktu() const {
+        return duaDigit(jam) + ":" + duaDigit(menit) + ":" + duaDigit(detik);
     }
 };
-
 
 class Pegawai {
 private:
@@ -82,11 +87,12 @@ private:
     Waktu pulang;
 
 public:
-    // ===== Constructor =====
     Pegawai() {
         NIP = "";
         nama = "";
         gol = 0;
+        datang = Waktu();
+        pulang = Waktu();
     }
 
     Pegawai(string NIP, string nama, int gol, Waktu datang, Waktu pulang) {
@@ -97,153 +103,169 @@ public:
         this->pulang = pulang;
     }
 
-    // ===== Setter & Getter =====
     void setNIP(string NIP) { this->NIP = NIP; }
-    string getNIP() { return NIP; }
+    string getNIP() const { return NIP; }
 
     void setNama(string nama) { this->nama = nama; }
-    string getNama() { return nama; }
+    string getNama() const { return nama; }
 
     void setGol(int gol) { this->gol = gol; }
-    int getGol() { return gol; }
+    int getGol() const { return gol; }
 
     void setDatang(Waktu datang) { this->datang = datang; }
-    Waktu getDatang() { return datang; }
+    Waktu getDatang() const { return datang; }
 
     void setPulang(Waktu pulang) { this->pulang = pulang; }
-    Waktu getPulang() { return pulang; }
+    Waktu getPulang() const { return pulang; }
 
-    // ===== INPUT (semua atribut dibaca di sini) =====
-    void input() {
-        cout << "NIP   : ";
-        getline(cin, NIP);
-        cout << "Nama  : ";
-        getline(cin, nama);
-        cout << "Gol   : ";
-        cin >> gol;
-        while (gol < 1 || gol > 4) {
-            cout << "Gol harus 1 - 4, ulangi: ";
-            cin >> gol;
+    int lamaKerja() const {
+        return datang.selisihWaktu(pulang);
+    }
+
+    int lamaLembur() const {
+        int lama = lamaKerja();
+
+        if (lama >= 28800) {
+            return lama - 28800;
+        } else {
+            return 0;
         }
-        datang.input("datang");
-        pulang.input("pulang");
     }
 
-    int hitungDurasiDetik() {
-        return datang.selisihDetik(pulang);
+    int jamLembur() const {
+        return lamaLembur() / 3600;
     }
 
-    Waktu hitungLamaKerja() {
-        return Waktu::dariDetik(hitungDurasiDetik());
-    }
-
-    int hitungGajiHarian() {
+    int getGaji() const {
         switch (gol) {
             case 1: return 150000;
             case 2: return 200000;
             case 3: return 400000;
             case 4: return 500000;
+            default: return 0;
         }
-        return 0;
     }
 
-    int hitungTarifLembur() {
+    int getTarifLembur() const {
         switch (gol) {
             case 1: return 50000;
             case 2: return 75000;
             case 3: return 150000;
             case 4: return 200000;
+            default: return 0;
         }
-        return 0;
     }
 
-    Waktu hitungKelebihanWaktu() {
-        int durasi = hitungDurasiDetik();
-        if (durasi < 8 * 3600) {
-            return Waktu(0, 0, 0);
-        }
-        return Waktu::dariDetik(durasi - 8 * 3600);
+    int getLembur() const {
+        return jamLembur() * getTarifLembur();
     }
 
-    int hitungJamLembur() {
-        return hitungKelebihanWaktu().getJam();
+    int getTotal() const {
+        return getGaji() + getLembur();
     }
 
-    int hitungLembur() {
-        return hitungJamLembur() * hitungTarifLembur();
-    }
-
-    int hitungTotal() {
-        return hitungGajiHarian() + hitungLembur();
-    }
-
-    string hitungStatus() {
-        if (hitungDurasiDetik() < 8 * 3600) {
+    string status() const {
+        if (lamaKerja() < 28800) {
             return "Peringatan";
+        } else {
+            return "Oke";
         }
-        return "ok";
     }
 
-    // ===== OUTPUT =====
-    void output(int nomor) {
-        cout << left << setw(4) << nomor;
-        cout << left << setw(8) << NIP;
-        cout << left << setw(15) << nama;
-        cout << left << setw(5) << gol;
-        datang.output(10);
-        pulang.output(10);
-        hitungLamaKerja().output(10);
-        hitungKelebihanWaktu().output(12);
-        cout << left << setw(13) << hitungGajiHarian();
-        cout << left << setw(10) << hitungLembur();
-        cout << left << setw(10) << hitungTotal();
-        cout << hitungStatus() << endl;
+    static string formatRupiah(int nilai) {
+        string angka = to_string(nilai < 0 ? -nilai : nilai);
+        string hasil = "";
+        int hitung = 0;
+        for (int i = (int)angka.length() - 1; i >= 0; i--) {
+            hasil.insert(hasil.begin(), angka[i]);
+            hitung++;
+            if (hitung % 3 == 0 && i != 0) {
+                hasil.insert(hasil.begin(), '.');
+            }
+        }
+        return hasil;
+    }
+
+    void inputPegawai() {
+        cout << "NIP           : ";
+        getline(cin, NIP);
+
+        cout << "Nama          : ";
+        getline(cin, nama);
+
+        cout << "Golongan      : ";
+        cin >> gol;
+
+        cout << "\nWaktu datang" << endl;
+        datang.inputWaktu();
+
+        cout << "\nWaktu pulang" << endl;
+        pulang.inputWaktu();
+
+        cin.ignore(1000, '\n');
+    }
+
+    void output(int no) const {
+        cout << left  << setw(3)  << no << ' '
+             << setw(6)  << NIP << ' '
+             << setw(10) << nama << ' '
+             << setw(4)  << gol << ' '
+             << setw(9)  << datang.outputWaktu() << ' '
+             << setw(9)  << pulang.outputWaktu() << ' '
+             << setw(9)  << Waktu(lamaKerja()).outputWaktu() << ' '
+             << setw(10) << Waktu(lamaLembur()).outputWaktu() << ' '
+             << right
+             << setw(12) << formatRupiah(getGaji()) << ' '
+             << setw(10) << formatRupiah(getLembur()) << ' '
+             << setw(10) << formatRupiah(getTotal()) << "  "
+             << left
+             << setw(10) << status()
+             << endl;
     }
 };
 
 class ArrayPegawai {
 private:
-    Pegawai *pegawai;
+    Pegawai* pegawai;
     int jumlah;
-
-    ArrayPegawai(const ArrayPegawai& lain);
-    ArrayPegawai& operator=(const ArrayPegawai& lain);
-
-    void garis() {
-        for (int i = 0; i < 117; i++) {
-            cout << "-";
-        }
-        cout << endl;
-    }
 
 public:
     ArrayPegawai() {
-        pegawai = NULL;
+        pegawai = nullptr;
         jumlah = 0;
     }
 
-    ArrayPegawai(int jumlah) {
+    explicit ArrayPegawai(int jumlah) {
         this->jumlah = jumlah;
         pegawai = new Pegawai[jumlah];
     }
 
-    ArrayPegawai(Pegawai isi[], int n) {
-        pegawai = NULL;
+    ArrayPegawai(const Pegawai isi[], int jumlah) {
+        pegawai = nullptr;
+        this->jumlah = 0;
+        setPegawai(isi, jumlah);
+    }
+
+    ArrayPegawai(const ArrayPegawai& lain) {
+        pegawai = nullptr;
         jumlah = 0;
-        setPegawai(isi, n);
+        setPegawai(lain.pegawai, lain.jumlah);
+    }
+
+    ArrayPegawai& operator=(const ArrayPegawai& lain) {
+        if (this != &lain) {
+            setPegawai(lain.pegawai, lain.jumlah);
+        }
+        return *this;
     }
 
     ~ArrayPegawai() {
-        if (pegawai != NULL) {
-            delete[] pegawai;
-        }
+        delete[] pegawai;
     }
 
-    void setPegawai(Pegawai isi[], int n) {
-        if (pegawai != NULL) {
-            delete[] pegawai;
-        }
-        jumlah = n;
+    void setPegawai(const Pegawai isi[], int jumlah) {
+        delete[] pegawai;
+        this->jumlah = jumlah;
         pegawai = new Pegawai[jumlah];
 
         for (int i = 0; i < jumlah; i++) {
@@ -251,74 +273,87 @@ public:
         }
     }
 
-    void setPegawaiKe(int indeks, Pegawai p) {
-        pegawai[indeks] = p;
+    void setPegawaiKe(int index, const Pegawai& p) {
+        if (pegawai != nullptr && index >= 0 && index < jumlah) {
+            pegawai[index] = p;
+        }
     }
 
-    Pegawai* getPegawai() {
-        return pegawai;
-    }
+    Pegawai* getPegawai() const { return pegawai; }
 
-    void setJumlah(int jumlah) {
-        this->jumlah = jumlah;
-    }
-
-    int getJumlah() {
-        return jumlah;
-    }
+    void setJumlah(int jumlah) { this->jumlah = jumlah; }
+    int getJumlah() const { return jumlah; }
 
     void input() {
-        if (pegawai != NULL) {
-            delete[] pegawai;
-            pegawai = NULL;
+        int n = 0;
+        while (n < 1) {
+            cout << "Jumlah pegawai: ";
+            cin >> n;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                n = 0;
+                cout << "Input harus berupa angka!" << endl;
+            } else {
+                cin.ignore(1000, '\n');
+                if (n < 1) {
+                    cout << "Jumlah tidak valid, harap ulangi." << endl;
+                }
+            }
         }
 
-        cout << "Jumlah pegawai: ";
-        cin >> jumlah;
-        while (jumlah < 1) {
-            cout << "Jumlah tidak valid, ulangi: ";
-            cin >> jumlah;
-        }
+        delete[] pegawai;
+        this->jumlah = n;
+        this->pegawai = new Pegawai[n];
 
-        pegawai = new Pegawai[jumlah];
-
-        for (int i = 0; i < jumlah; i++) {
-            cout << "\nData Pegawai ke-" << i + 1 << endl;
-            cin.ignore(1000, '\n');
-            pegawai[i].input();      // cukup input(), hasil dihitung saat output
+        for (int i = 0; i < n; i++) {
+            cout << "\nData Pegawai ke-" << (i + 1) << endl;
+            pegawai[i].inputPegawai();
         }
     }
 
-    void output() {
-        if (pegawai == NULL || jumlah == 0) {
-            cout << "Data pegawai kosong!" << endl;
+    int totalGaji() const {
+        int total = 0;
+        for (int i = 0; i < jumlah; i++) {
+            total += pegawai[i].getTotal();
+        }
+        return total;
+    }
+
+    void output() const {
+        if (pegawai == nullptr || jumlah == 0) {
+            cout << "Belum ada data pegawai." << endl;
             return;
         }
 
+        string garis(114, '-');
+
         cout << endl;
-        cout << setw(40) << "" << "Daftar Gaji Harian PT Informatika" << endl;
-        garis();
-
-        cout << left << setw(4) << "No";
-        cout << left << setw(8) << "NIP";
-        cout << left << setw(15) << "Nama";
-        cout << left << setw(5) << "Gol";
-        cout << left << setw(10) << "Datang";
-        cout << left << setw(10) << "Pulang";
-        cout << left << setw(10) << "Lama";
-        cout << left << setw(12) << "Jam Lembur";
-        cout << left << setw(13) << "Gaji Harian";
-        cout << left << setw(10) << "Lembur";
-        cout << left << setw(10) << "Total";
-        cout << "Status" << endl;
-
-        garis();
+        cout << "                              Daftar Gaji Harian PT Informatika" << endl;
+        cout << garis << endl;
+        cout << left
+             << setw(3)  << "No" << ' '
+             << setw(6)  << "NIP" << ' '
+             << setw(10) << "Nama" << ' '
+             << setw(4)  << "Gol" << ' '
+             << setw(9)  << "Datang" << ' '
+             << setw(9)  << "Pulang" << ' '
+             << setw(9)  << "Lama" << ' '
+             << setw(10) << "Jam Lembur" << ' '
+             << right
+             << setw(12) << "Gaji Harian" << ' '
+             << setw(10) << "Lembur" << ' '
+             << setw(10) << "Total" << "  "
+             << left
+             << setw(10) << "Status"
+             << endl;
+        cout << garis << endl;
 
         for (int i = 0; i < jumlah; i++) {
             pegawai[i].output(i + 1);
         }
 
-        garis();
+        cout << garis << endl;
     }
 };
 
@@ -326,121 +361,169 @@ class Menu {
 private:
     int pilihan;
 
-    void tampilkan(ArrayPegawai &arrayPegawai) {
+    void Constructor() {
+        cout << "--- 1. Constructor ---" << endl;
+        Pegawai isi[3] = {
+            Pegawai("001", "Ali", 3, Waktu(8, 0, 0), Waktu(17, 15, 10)),
+            Pegawai("004", "ida", 2, Waktu(8, 30, 0), Waktu(15, 0, 0)),
+            Pegawai("005", "Adi", 1, Waktu(7, 45, 0), Waktu(18, 50, 30))
+        };
+        ArrayPegawai arrayPegawai(isi, 3);
+        arrayPegawai.output();
+    }
+
+    void Setter() {
+        cout << "--- 2. Setter ---" << endl;
+        ArrayPegawai arrayPegawai(2);
+
+        Pegawai p1;
+        p1.setNIP("010");
+        p1.setNama("Budi");
+        p1.setGol(4);
+        p1.setDatang(Waktu(7, 30, 0));
+        p1.setPulang(Waktu(17, 0, 0));
+
+        Pegawai p2;
+        p2.setNIP("011");
+        p2.setNama("Sari");
+        p2.setGol(2);
+        p2.setDatang(Waktu(9, 0, 0));
+        p2.setPulang(Waktu(15, 30, 0));
+
+        arrayPegawai.setPegawaiKe(0, p1);
+        arrayPegawai.setPegawaiKe(1, p2);
+        arrayPegawai.output();
+    }
+
+    void inputDalam() {
+        cout << "--- 3. Input Dalam Class ---" << endl;
+        ArrayPegawai arrayPegawai;
+        arrayPegawai.input();
+        arrayPegawai.output();
+    }
+
+    void inputLuar() {
+        cout << "--- 4. Input Luar Class ---" << endl;
+        int jumlah = 0;
+        while (jumlah < 1) {
+            cout << "Jumlah pegawai: ";
+            cin >> jumlah;
+            if (cin.fail()) {
+                cin.clear();
+                cin.ignore(1000, '\n');
+                jumlah = 0;
+                cout << "Input harus berupa angka!" << endl;
+            } else {
+                cin.ignore(1000, '\n');
+                if (jumlah < 1) {
+                    cout << "Jumlah tidak valid, ulangi." << endl;
+                }
+            }
+        }
+
+        Pegawai* isi = new Pegawai[jumlah];
+
+        for (int i = 0; i < jumlah; i++) {
+            string nip, nama;
+            int gol, jam, menit, detik;
+
+            cout << "\nData Pegawai ke-" << (i + 1) << endl;
+
+            cout << "NIP           : ";
+            getline(cin, nip);
+
+            cout << "Nama          : ";
+            getline(cin, nama);
+
+            cout << "Gol           : ";
+            cin >> gol;
+
+            cout << "\nWaktu datang" << endl;
+            cout << "Jam           : ";
+            cin >> jam;
+            cout << "Menit         : ";
+            cin >> menit;
+            cout << "Detik         : ";
+            cin >> detik;
+            isi[i].setDatang(Waktu(jam, menit, detik));
+
+            cout << "\nWaktu pulang" << endl;
+            cout << "Jam           : ";
+            cin >> jam;
+            cout << "Menit         : ";
+            cin >> menit;
+            cout << "Detik         : ";
+            cin >> detik;
+            isi[i].setPulang(Waktu(jam, menit, detik));
+
+            cin.ignore(1000, '\n');
+
+            isi[i].setNIP(nip);
+            isi[i].setNama(nama);
+            isi[i].setGol(gol);
+        }
+
+        ArrayPegawai arrayPegawai;
+        arrayPegawai.setPegawai(isi, jumlah);
+        delete[] isi;
         arrayPegawai.output();
     }
 
 public:
+    Menu() {
+        pilihan = 0;
+    }
+
+    void tampilanMenu() const {
+        cout << "\n==========================================" << endl;
+        cout << "     MENU PROGRAM GAJI HARIAN PEGAWAI     " << endl;
+        cout << "==========================================" << endl;
+        cout << "1. Constructor" << endl;
+        cout << "2. Setter" << endl;
+        cout << "3. Input Dalam Class" << endl;
+        cout << "4. Input Luar Class" << endl;
+        cout << "5. Keluar" << endl;
+        cout << "------------------------------------------" << endl;
+    }
+
+    void inputPilihan() {
+        cout << "Pilih Menu (1-5): ";
+        cin >> pilihan;
+        if (cin.eof()) {
+            pilihan = 5;
+        } else if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            pilihan = 0;
+        } else {
+            cin.ignore(1000, '\n');
+        }
+        cout << endl;
+    }
+
     void run() {
         do {
-            cout << "\n==========================================" << endl;
-            cout << "     MENU PROGRAM GAJI HARIAN PEGAWAI     " << endl;
-            cout << "==========================================" << endl;
-            cout << "1. Constructor" << endl;
-            cout << "2. Setter" << endl;
-            cout << "3. Input Dalam Class" << endl;
-            cout << "4. Input Luar Class" << endl;
-            cout << "5. Keluar" << endl;
-            cout << "------------------------------------------" << endl;
-            cout << "Pilih Menu (1-5): ";
-            cin >> pilihan;
-            cout << endl;
+            tampilanMenu();
+            inputPilihan();
 
             switch (pilihan) {
-                case 1: {
-                    cout << "--- 1. Constructor ---" << endl;
-                    // Semua 5 atribut langsung diisi lewat constructor
-                    Pegawai isi[3] = {
-                        Pegawai("001", "Ali", 3, Waktu(8, 0, 0), Waktu(17, 15, 10)),
-                        Pegawai("004", "ida", 2, Waktu(8, 30, 0), Waktu(15, 0, 0)),
-                        Pegawai("005", "Adi", 1, Waktu(7, 45, 0), Waktu(18, 50, 30))
-                    };
-                    ArrayPegawai arrayPegawai(isi, 3);
-                    tampilkan(arrayPegawai);
+                case 1:
+                    Constructor();
                     break;
-                }
-                case 2: {
-                    cout << "--- 2. Setter ---" << endl;
-                    ArrayPegawai arrayPegawai(2);
-
-                    // Atribut diisi satu per satu lewat setter
-                    Pegawai p1;
-                    p1.setNIP("010");
-                    p1.setNama("Budi");
-                    p1.setGol(4);
-                    p1.setDatang(Waktu(7, 30, 0));
-                    p1.setPulang(Waktu(17, 0, 0));
-
-                    Pegawai p2;
-                    p2.setNIP("011");
-                    p2.setNama("Sari");
-                    p2.setGol(2);
-                    p2.setDatang(Waktu(9, 0, 0));
-                    p2.setPulang(Waktu(15, 30, 0));
-
-                    arrayPegawai.setPegawaiKe(0, p1);
-                    arrayPegawai.setPegawaiKe(1, p2);
-                    tampilkan(arrayPegawai);
+                case 2:
+                    Setter();
                     break;
-                }
-                case 3: {
-                    cout << "--- 3. Input Dalam Class ---" << endl;
-                    ArrayPegawai arrayPegawai;
-                    arrayPegawai.input();
-                    tampilkan(arrayPegawai);
+                case 3:
+                    inputDalam();
                     break;
-                }
-                case 4: {
-                    cout << "--- 4. Input Luar Class ---" << endl;
-                    int jumlah;
-
-                    cout << "Jumlah pegawai: ";
-                    cin >> jumlah;
-                    while (jumlah < 1) {
-                        cout << "Jumlah tidak valid, ulangi: ";
-                        cin >> jumlah;
-                    }
-
-                    Pegawai *isi = new Pegawai[jumlah];
-
-                    for (int i = 0; i < jumlah; i++) {
-                        string nip, nama;
-                        int gol, jam, menit, detik;
-
-                        cout << "\nData Pegawai ke-" << i + 1 << endl;
-                        cin.ignore(1000, '\n');
-
-                        cout << "NIP   : ";
-                        getline(cin, nip);
-
-                        cout << "Nama  : ";
-                        getline(cin, nama);
-
-                        cout << "Gol   : ";
-                        cin >> gol;
-
-                        cout << "Waktu datang (jam menit detik): ";
-                        cin >> jam >> menit >> detik;
-                        Waktu datang(jam, menit, detik);
-
-                        cout << "Waktu pulang (jam menit detik): ";
-                        cin >> jam >> menit >> detik;
-                        Waktu pulang(jam, menit, detik);
-
-                        isi[i] = Pegawai(nip, nama, gol, datang, pulang);
-                    }
-
-                    ArrayPegawai arrayPegawai;
-                    arrayPegawai.setPegawai(isi, jumlah);
-                    delete[] isi;
-                    tampilkan(arrayPegawai);
+                case 4:
+                    inputLuar();
                     break;
-                }
                 case 5:
                     cout << "Selesai. Keluar dari program." << endl;
                     break;
                 default:
-                    cout << "Pilihan menu tidak valid! Silakan masukkan opsi 1 - 5." << endl;
+                    cout << "Pilihan menu tidak valid! Silakan masukkan opsi 1-5." << endl;
                     break;
             }
         } while (pilihan != 5);
