@@ -1,3 +1,14 @@
+/*
+Nama Program        : Soal3_017_043_053.cpp
+Nama NPM Anggota 1  : Jasmine Salsabila (140810250017)
+Nama NPM Anggota 2  : Raffa Pasha Hidayat (140810250043)
+Nama NPM Anggota 3  : Asma Hamidah (140810250053)
+Tanggal Pengerjaan  : 13 Oktober 2026
+Deskripsi           : Program OOP Array of Object untuk menghitung
+                      gaji harian dan lembur pegawai berdasarkan
+                      lama kerja.
+*/
+
 import java.util.Scanner;
 
 class Waktu {
