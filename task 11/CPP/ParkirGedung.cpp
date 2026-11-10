@@ -1,106 +1,126 @@
-/*
-Nama Program        : Gaji Pegawai
-Nama NPM Anggota 1  : Jasmine Salsabila (140810250017)
-Nama NPM Anggota 2  : Raffa Pasha Hidayat (140810250043)
-Nama NPM Anggota 3  : Asma Hamidah (140810250053)
-Tanggal Pengerjaan  : 10 November 2026
-Deskripsi           : Program Sistem Parkir Gedung merupakan program berbasis Java yang digunakan untuk mengelola data parkir kendaraan, baik untuk pengguna umum maupun pegawai. Program ini mencatat identitas pengguna, jenis kendaraan, lokasi parkir, tanggal dan waktu masuk, serta durasi parkir. Biaya parkir dihitung berdasarkan jenis kendaraan, status pengguna, dan lama parkir, dengan penerapan diskon bagi pengguna umum sesuai ketentuan kunjungan. Program ini menerapkan konsep OOP, meliputi encapsulation, inheritance, polymorphism, abstraction, dan composition.
-*/
 
-#include <iostream>
-#include <string>
-#include <cmath>
-#include <iomanip>
-#include <sstream>
-#include <ctime>
+            cout << "Alamat         : ";
+            getline(cin, alamat);
 
-using namespace std;
+            if (pegawai) {
+                cout << "NIP            : ";
+                getline(cin, nip);
+            }
 
-const int MAKS_DATA = 1000;
+            jenis = inputInt(
+                "Jenis kendaraan (1. Mobil / 2. Truk / 3. Motor): "
+            );
 
-// ==========================================
-// CLASS WAKTU
-// ==========================================
-class Waktu {
-private:
-    int jam, menit, detik;
+            if (jenis < 1 || jenis > 3) {
+                cout << "Jenis kendaraan tidak valid. Data dilewati." << endl;
+                continue;
+            }
 
-public:
-    Waktu() {
-        jam = 0;
-        menit = 0;
-        detik = 0;
-    }
+            cout << "Nomor plat     : ";
+            getline(cin >> ws, plat);
 
-    Waktu(int j, int m, int d) {
-        jam = j;
-        menit = m;
-        detik = d;
-    }
+            cout << "Tanggal parkir (YYYY-MM-DD): ";
+            getline(cin, tanggalInput);
 
-    int getJam() const { return jam; }
-    int getMenit() const { return menit; }
-    int getDetik() const { return detik; }
+            if (!parseTanggal(tanggalInput, tahun, bulan, hari)) {
+                cout << "Tanggal tidak valid. Data dilewati." << endl;
+                continue;
+            }
 
-    long long toSecond() const {
-        return jam * 3600LL + menit * 60LL + detik;
-    }
+            cout << "\nMasukkan waktu masuk:" << endl;
+            int jam, menit, detik;
 
-    void output() const {
-        cout << setfill('0') << setw(2) << jam << ":"
-             << setw(2) << menit << ":"
-             << setw(2) << detik << setfill(' ');
+            jam = inputInt("Jam   : ");
+            menit = inputInt("Menit : ");
+            detik = inputInt("Detik : ");
+
+            if (jam < 0 || jam > 23 ||
+                menit < 0 || menit > 59 ||
+                detik < 0 || detik > 59) {
+                cout << "Waktu masuk tidak valid. Data dilewati." << endl;
+                continue;
+            }
+
+            Waktu waktuMasuk(jam, menit, detik);
+
+            cout << "\nMasukkan lama parkir:" << endl;
+
+            int jamLama, menitLama, detikLama;
+            jamLama = inputInt("Jam   : ");
+            menitLama = inputInt("Menit : ");
+            detikLama = inputInt("Detik : ");
+
+            if (jamLama < 0 || menitLama < 0 || menitLama > 59 ||
+                detikLama < 0 || detikLama > 59 ||
+                (jamLama == 0 && menitLama == 0 && detikLama == 0)) {
+                cout << "Durasi parkir tidak valid. Data dilewati." << endl;
+                continue;
+            }
+
+            Waktu lamaParkir(jamLama, menitLama, detikLama);
+
+            Kendaraan* kendaraan = nullptr;
+
+            if (jenis == 1) {
+                kendaraan = new Mobil(plat);
+            } else if (jenis == 2) {
+                kendaraan = new Truk(plat);
+            } else {
+                kendaraan = new Motor(plat);
+            }
+
+            int kunjunganSebelumnya = 0;
+
+            if (!pegawai) {
+                for (int j = 0; j < jumlahValid; j++) {
+                    if (!dataBaru[j].isPegawai() &&
+                        dataBaru[j].platSama(plat) &&
+                        kunciMinggu(
+                            dataBaru[j].getTahun(),
+                            dataBaru[j].getBulan(),
+                            dataBaru[j].getHari()
+                        ) == kunciMinggu(tahun, bulan, hari)) {
+                        kunjunganSebelumnya++;
+                    }
+                }
+
+                kunjunganSebelumnya +=
+                    dataParkir.hitungKunjunganMinggu(
+                        plat, tahun, bulan, hari
+                    );
+            }
+
+            int kunjunganSaatIni =
+                pegawai ? 0 : kunjunganSebelumnya + 1;
+
+            string lokasi = pilihanLokasi == 1 ? "Dalam" : "Luar";
+
+            Parkir transaksi;
+            transaksi.isiData(
+                kode, Person(nama, alamat), kendaraan,
+                pegawai, nip, tahun, bulan, hari,
+                waktuMasuk, lamaParkir,
+                kunjunganSaatIni, lokasi
+            );
+
+            dataBaru[jumlahValid] = transaksi;
+            jumlahValid++;
+        }
+
+        for (int i = 0; i < jumlahValid; i++) {
+            dataParkir.tambah(dataBaru[i]);
+        }
+
+        dataParkir.output();
     }
 };
 
 // ==========================================
-// CLASS PERSON
+// PROGRAM UTAMA
 // ==========================================
-class Person {
-private:
-    string nama, alamat;
+int main() {
+    Menu menu;
+    menu.run();
 
-public:
-    Person() {}
-
-    Person(string n, string a) {
-        nama = n;
-        alamat = a;
-    }
-
-    void output() const {
-        cout << "Nama           : " << nama << endl;
-        cout << "Alamat         : " << alamat << endl;
-    }
-};
-
-// ==========================================
-// CLASS KENDARAAN (INDUK)
-// ==========================================
-class Kendaraan {
-protected:
-    string nomorPlat;
-
-public:
-    Kendaraan(string plat) {
-        nomorPlat = plat;
-    }
-
-    virtual ~Kendaraan() {}
-
-    string getNomorPlat() const {
-        return nomorPlat;
-    }
-
-    virtual int getTarifUmum() const = 0;
-    virtual int getTarifPegawai() const = 0;
-    virtual string getJenis() const = 0;
-
-    int hitungBiayaUmum(int jam) const {
-        return getTarifUmum() * jam;
-    }
-
-    int hitungBiayaPegawai(int hari) const {
-        return getTarifPegawai() * hari;
-    }
-};
+    return 0;
+}
