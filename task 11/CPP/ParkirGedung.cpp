@@ -8,356 +8,330 @@ Deskripsi           : Program Sistem Parkir Gedung merupakan program berbasis Ja
 */
 
 
-
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 #include <iomanip>
-#include <cmath>
-#include <ctime>
 #include <sstream>
-#include <limits>
-
+#include <ctime>
+#include <cmath>
+#include <algorithm>
 using namespace std;
 
 // ==================== CLASS WAKTU ====================
-
 class Waktu {
 private:
     int jam, menit, detik;
 
 public:
-    Waktu() : jam(0), menit(0), detik(0) {}
+    Waktu() {
+        jam = 0;
+        menit = 0;
+        detik = 0;
+    }
 
-    Waktu(int jam, int menit, int detik)
-        : jam(jam), menit(menit), detik(detik) {}
+    Waktu(int jam, int menit, int detik) {
+        this->jam = jam;
+        this->menit = menit;
+        this->detik = detik;
+    }
 
-    int getJam() const { return jam; }
-    int getMenit() const { return menit; }
-    int getDetik() const { return detik; }
+    int getJam() { return jam; }
+    int getMenit() { return menit; }
+    int getDetik() { return detik; }
 
     void inputWaktu() {
         cout << "Jam   : ";
         cin >> jam;
-
         cout << "Menit : ";
         cin >> menit;
-
         cout << "Detik : ";
         cin >> detik;
     }
 
-    long long toSecond() const {
-        return jam * 3600LL + menit * 60LL + detik;
+    int toSecond() {
+        return jam * 3600 + menit * 60 + detik;
     }
 
-    void outputWaktu() const {
-        cout << setfill('0')
-             << setw(2) << jam << ":"
+    void outputWaktu() {
+        cout << setfill('0') << setw(2) << jam << ":"
              << setw(2) << menit << ":"
-             << setw(2) << detik
-             << setfill(' ');
-    }
-};
-
-// ==================== FUNGSI TANGGAL ====================
-
-struct Tanggal {
-    int tahun, bulan, hari;
-
-    static Tanggal input(const string& teks) {
-        Tanggal t;
-        sscanf(teks.c_str(), "%d-%d-%d",
-               &t.tahun, &t.bulan, &t.hari);
-        return t;
+             << setw(2) << detik << setfill(' ');
     }
 
-    tm toTM() const {
-        tm waktu = {};
-        waktu.tm_year = tahun - 1900;
-        waktu.tm_mon = bulan - 1;
-        waktu.tm_mday = hari;
-        waktu.tm_isdst = -1;
-        mktime(&waktu);
-        return waktu;
-    }
-
-    string toString() const {
-        ostringstream out;
-        out << setfill('0')
-            << setw(4) << tahun << "-"
-            << setw(2) << bulan << "-"
-            << setw(2) << hari;
-        return out.str();
-    }
-
-    Tanggal tambahDetik(long long detik) const {
-        tm waktu = toTM();
-        time_t waktuMasuk = mktime(&waktu);
-        waktuMasuk += detik;
-
-        tm* hasil = localtime(&waktuMasuk);
-
-        return {
-            hasil->tm_year + 1900,
-            hasil->tm_mon + 1,
-            hasil->tm_mday
-        };
-    }
-
-    string minggu() const {
-        tm waktu = toTM();
-
-        // Menentukan hari Senin dalam minggu yang sama.
-        int mundur = (waktu.tm_wday + 6) % 7;
-        waktu.tm_mday -= mundur;
-
-        mktime(&waktu);
-
-        ostringstream out;
-        out << setw(4) << setfill('0')
-            << waktu.tm_year + 1900 << "-"
-            << setw(2) << waktu.tm_mon + 1 << "-"
-            << setw(2) << waktu.tm_mday;
-
-        return out.str();
+    bool valid() {
+        return jam >= 0 && menit >= 0 && menit < 60
+               && detik >= 0 && detik < 60;
     }
 };
 
 // ==================== CLASS PERSON ====================
-
 class Person {
 private:
     string nama, alamat;
 
 public:
-    Person(string nama, string alamat)
-        : nama(nama), alamat(alamat) {}
+    Person(string nama, string alamat) {
+        this->nama = nama;
+        this->alamat = alamat;
+    }
 
-    string getNama() const { return nama; }
-    string getAlamat() const { return alamat; }
+    string getNama() { return nama; }
+    string getAlamat() { return alamat; }
 
-    void output() const {
-        cout << "Nama           : " << nama << endl;
-        cout << "Alamat         : " << alamat << endl;
+    void output() {
+        cout << "Nama             : " << nama << endl;
+        cout << "Alamat           : " << alamat << endl;
     }
 };
 
 // ==================== CLASS KENDARAAN ====================
-
 class Kendaraan {
 protected:
     string nomorPlat;
 
 public:
-    Kendaraan(string nomorPlat) : nomorPlat(nomorPlat) {}
-
-    virtual int getTarifUmum() const = 0;
-    virtual int getTarifPegawai() const = 0;
-    virtual string getJenis() const = 0;
-
-    string getNomorPlat() const {
-        return nomorPlat;
-    }
-
-    int hitungBiayaUmum(int jam) const {
-        return getTarifUmum() * jam;
-    }
-
-    int hitungBiayaPegawai(int hari) const {
-        return getTarifPegawai() * hari;
+    Kendaraan(string nomorPlat) {
+        this->nomorPlat = nomorPlat;
     }
 
     virtual ~Kendaraan() {}
+
+    string getNomorPlat() {
+        return nomorPlat;
+    }
+
+    virtual int getTarifUmum() = 0;
+    virtual int getTarifPegawai() = 0;
+    virtual string getJenis() = 0;
+
+    int hitungBiayaUmum(int jam) {
+        return getTarifUmum() * jam;
+    }
+
+    int hitungBiayaPegawai(int hari) {
+        return getTarifPegawai() * hari;
+    }
 };
 
+// ==================== CLASS MOBIL ====================
 class Mobil : public Kendaraan {
 public:
-    Mobil(string plat) : Kendaraan(plat) {}
+    Mobil(string nomorPlat) : Kendaraan(nomorPlat) {}
 
-    int getTarifUmum() const override { return 3000; }
-    int getTarifPegawai() const override { return 6000; }
-    string getJenis() const override { return "Mobil"; }
+    int getTarifUmum() override { return 3000; }
+    int getTarifPegawai() override { return 6000; }
+    string getJenis() override { return "Mobil"; }
 };
 
+// ==================== CLASS TRUK ====================
 class Truk : public Kendaraan {
 public:
-    Truk(string plat) : Kendaraan(plat) {}
+    Truk(string nomorPlat) : Kendaraan(nomorPlat) {}
 
-    int getTarifUmum() const override { return 5000; }
-    int getTarifPegawai() const override { return 5000; }
-    string getJenis() const override { return "Truk"; }
+    int getTarifUmum() override { return 5000; }
+    int getTarifPegawai() override { return 5000; }
+    string getJenis() override { return "Truk"; }
 };
 
+// ==================== CLASS MOTOR ====================
 class Motor : public Kendaraan {
 public:
-    Motor(string plat) : Kendaraan(plat) {}
+    Motor(string nomorPlat) : Kendaraan(nomorPlat) {}
 
-    int getTarifUmum() const override { return 2000; }
-    int getTarifPegawai() const override { return 3000; }
-    string getJenis() const override { return "Motor"; }
+    int getTarifUmum() override { return 2000; }
+    int getTarifPegawai() override { return 3000; }
+    string getJenis() override { return "Motor"; }
 };
 
-// ==================== CLASS PARKIR ====================
+// ==================== FUNGSI BANTU TANGGAL ====================
+tm ubahTanggal(string tanggal) {
+    tm waktu = {};
+    int tahun, bulan, hari;
+    sscanf(tanggal.c_str(), "%d-%d-%d", &tahun, &bulan, &hari);
 
+    waktu.tm_year = tahun - 1900;
+    waktu.tm_mon = bulan - 1;
+    waktu.tm_mday = hari;
+    waktu.tm_isdst = -1;
+    mktime(&waktu);
+
+    return waktu;
+}
+
+string tanggalKeluar(string tanggal, Waktu masuk, Waktu durasi) {
+    tm waktu = ubahTanggal(tanggal);
+
+    waktu.tm_hour = masuk.getJam();
+    waktu.tm_min = masuk.getMenit();
+    waktu.tm_sec = masuk.getDetik() + durasi.toSecond();
+
+    mktime(&waktu);
+
+    stringstream hasil;
+    hasil << setfill('0')
+          << setw(4) << waktu.tm_year + 1900 << "-"
+          << setw(2) << waktu.tm_mon + 1 << "-"
+          << setw(2) << waktu.tm_mday << " ";
+
+    int jam = waktu.tm_hour;
+    int menit = waktu.tm_min;
+    int detik = waktu.tm_sec;
+
+    hasil << setw(2) << jam << ":" << setw(2) << menit;
+    if (detik != 0) {
+        hasil << ":" << setw(2) << detik;
+    }
+
+    return hasil.str();
+}
+
+int mingguKe(string tanggal) {
+    tm waktu = ubahTanggal(tanggal);
+    return waktu.tm_yday - ((waktu.tm_wday + 6) % 7);
+}
+
+// ==================== CLASS PARKIR ====================
 class Parkir {
 private:
     string kode;
     Person person;
-    Kendaraan* kendaraan;
+    shared_ptr<Kendaraan> kendaraan;
     bool pegawai;
     string nip;
-
-    Tanggal tanggal;
+    string tanggal;
     Waktu waktuMasuk;
     Waktu lamaParkir;
-
     int kunjungan;
     string lokasi;
 
 public:
     Parkir(string kode, Person person,
-           Kendaraan* kendaraan, bool pegawai,
-           string nip, Tanggal tanggal,
+           shared_ptr<Kendaraan> kendaraan,
+           bool pegawai, string nip, string tanggal,
            Waktu waktuMasuk, Waktu lamaParkir,
-           int kunjungan, string lokasi)
-        : kode(kode), person(person),
-          kendaraan(kendaraan), pegawai(pegawai),
-          nip(nip), tanggal(tanggal),
-          waktuMasuk(waktuMasuk),
-          lamaParkir(lamaParkir),
-          kunjungan(kunjungan), lokasi(lokasi) {}
+           int kunjungan)
+        : kode(kode), person(person), kendaraan(kendaraan),
+          pegawai(pegawai), nip(nip), tanggal(tanggal),
+          waktuMasuk(waktuMasuk), lamaParkir(lamaParkir),
+          kunjungan(kunjungan), lokasi("") {}
 
-    Kendaraan* getKendaraan() const {
+    void setLokasi(string lokasi) {
+        this->lokasi = lokasi;
+    }
+
+    shared_ptr<Kendaraan> getKendaraan() {
         return kendaraan;
     }
 
-    bool isPegawai() const {
-        return pegawai;
+    bool isPegawai() { return pegawai; }
+    string getTanggal() { return tanggal; }
+    int getKunjungan() { return kunjungan; }
+
+    string getWaktuKeluar() {
+        return tanggalKeluar(tanggal, waktuMasuk, lamaParkir);
     }
 
-    Tanggal getTanggal() const {
-        return tanggal;
-    }
-
-    int getKunjungan() const {
-        return kunjungan;
-    }
-
-    Tanggal getTanggalKeluar() const {
-        long long total = waktuMasuk.toSecond()
-                        + lamaParkir.toSecond();
-
-        return tanggal.tambahDetik(total);
-    }
-
-    string getJamKeluar() const {
-        long long total = waktuMasuk.toSecond()
-                        + lamaParkir.toSecond();
-
-        int jam = (total / 3600) % 24;
-        int menit = (total / 60) % 60;
-        int detik = total % 60;
-
-        ostringstream out;
-        out << setfill('0')
-            << setw(2) << jam << ":"
-            << setw(2) << menit;
-
-        if (detik != 0) {
-            out << ":" << setw(2) << detik;
-        }
-
-        return out.str();
-    }
-
-    int hitungBiaya() const {
-        long long totalDetik = lamaParkir.toSecond();
+    int hitungBiaya() {
+        int biaya;
+        int totalDetik = lamaParkir.toSecond();
 
         if (pegawai) {
-            if (dynamic_cast<Truk*>(kendaraan) != nullptr) {
-                int jam = ceil(totalDetik / 3600.0);
-                return kendaraan->hitungBiayaUmum(jam);
+            if (kendaraan->getJenis() == "Truk") {
+                int jam = (totalDetik + 3599) / 3600;
+                biaya = kendaraan->hitungBiayaUmum(jam);
+            } else {
+                int hari = (totalDetik + 86399) / 86400;
+                biaya = kendaraan->hitungBiayaPegawai(hari);
             }
+        } else {
+            int jam = (totalDetik + 3599) / 3600;
+            biaya = kendaraan->hitungBiayaUmum(jam);
 
-            int hari = ceil(totalDetik / 86400.0);
-            return kendaraan->hitungBiayaPegawai(hari);
-        }
-
-        int jam = ceil(totalDetik / 3600.0);
-        int biaya = kendaraan->hitungBiayaUmum(jam);
-
-        if (kunjungan >= 2) {
-            biaya -= biaya * 10 / 100;
+            if (kunjungan >= 2) {
+                biaya -= biaya * 10 / 100;
+            }
         }
 
         return biaya;
     }
 
-    void output() const {
-        cout << "\n====================================" << endl;
-        cout << "         DATA PARKIR GEDUNG" << endl;
-        cout << "====================================" << endl;
-
-        cout << "Kode Parkir    : " << kode << endl;
-        cout << "Lokasi         : " << lokasi << endl;
-
+    void output() {
+        cout << "\n========================================\n";
+        cout << "           LAPORAN PARKIR\n";
+        cout << "========================================\n";
+        cout << "Kode Parkir       : " << kode << endl;
+        cout << "Lokasi Parkir     : " << lokasi << endl;
         person.output();
 
-        cout << "Jenis Pengguna : "
-             << (pegawai ? "Pegawai" : "Umum") << endl;
-
         if (pegawai) {
-            cout << "NIP            : " << nip << endl;
+            cout << "Status Pengguna   : Pegawai\n";
+            cout << "NIP               : " << nip << endl;
+        } else {
+            cout << "Status Pengguna   : Umum\n";
         }
 
-        cout << "Kendaraan      : " << kendaraan->getJenis() << endl;
-        cout << "Nomor Plat     : " << kendaraan->getNomorPlat() << endl;
-        cout << "Tanggal Masuk  : " << tanggal.toString() << endl;
-
-        cout << "Jam Masuk      : ";
+        cout << "Jenis Kendaraan   : " << kendaraan->getJenis() << endl;
+        cout << "Nomor Plat        : " << kendaraan->getNomorPlat() << endl;
+        cout << "Tanggal           : " << tanggal << endl;
+        cout << "Waktu Masuk       : ";
         waktuMasuk.outputWaktu();
         cout << endl;
-
-        cout << "Lama Parkir    : ";
+        cout << "Lama Parkir       : ";
         lamaParkir.outputWaktu();
         cout << endl;
-
-        cout << "Tanggal Keluar : "
-             << getTanggalKeluar().toString() << endl;
-
-        cout << "Jam Keluar     : " << getJamKeluar() << endl;
-
-        if (!pegawai) {
-            cout << "Kunjungan      : " << kunjungan << endl;
-
-            if (kunjungan >= 2) {
-                cout << "Diskon         : 10%" << endl;
-            }
-        }
-
-        cout << "Total Biaya    : Rp" << hitungBiaya() << endl;
-        cout << "====================================" << endl;
+        cout << "Waktu Keluar      : " << getWaktuKeluar() << endl;
+        cout << "Kunjungan         : " << kunjungan << endl;
+        cout << "Total Biaya       : Rp" << hitungBiaya() << endl;
+        cout << "========================================\n";
     }
 };
 
-// ==================== CLASS DATA PARKIR ====================
-
+// ==================== CLASS DATAPARKIR ====================
 class DataParkir {
 private:
-    vector<Parkir*> parkir;
+    vector<Parkir> parkir;
+    int jumlah;
 
 public:
-    int hitungKunjunganMinggu(string plat,
-                              Tanggal tanggal) const {
-        int total = 0;
+    DataParkir() {
+        jumlah = 0;
+    }
 
-        for (Parkir* p : parkir) {
-            if (p != nullptr &&
-                !p->isPegawai() &&
-                p->getKendaraan()->getNomorPlat() == plat) {
+    vector<Parkir> getParkir() {
+        return parkir;
+    }
 
-                if (p->getTanggal().minggu() == tanggal.minggu()) {
+    int getJumlah() {
+        return jumlah;
+    }
+
+    void setParkir(vector<Parkir> data) {
+        parkir = data;
+        jumlah = data.size();
+    }
+
+    int hitungKunjunganMinggu(string plat, string tanggal) {
+        int total = 1;
+        tm tanggalDicari = ubahTanggal(tanggal);
+        int mingguDicari = mingguKe(tanggal);
+
+        for (int i = 0; i < jumlah; i++) {
+            string platLama = parkir[i].getKendaraan()->getNomorPlat();
+            string platBaru = plat;
+
+            transform(platLama.begin(), platLama.end(),
+                      platLama.begin(), ::tolower);
+            transform(platBaru.begin(), platBaru.end(),
+                      platBaru.begin(), ::tolower);
+
+            if (!parkir[i].isPegawai() &&
+                platLama == platBaru) {
+                tm tanggalLama = ubahTanggal(parkir[i].getTanggal());
+
+                if (tanggalLama.tm_year == tanggalDicari.tm_year &&
+                    mingguKe(parkir[i].getTanggal()) == mingguDicari) {
                     total++;
                 }
             }
@@ -366,190 +340,230 @@ public:
         return total;
     }
 
-    void tambah(Parkir* p) {
-        parkir.push_back(p);
-    }
+    void output() {
+        cout << "\n\n========== SELURUH DATA PARKIR ==========\n";
 
-    void output() const {
-        cout << "\n\n========== LAPORAN PARKIR ==========" << endl;
-
-        if (parkir.empty()) {
-            cout << "Belum ada data parkir." << endl;
-            return;
+        for (int i = 0; i < jumlah; i++) {
+            parkir[i].output();
         }
 
-        for (Parkir* p : parkir) {
-            if (p != nullptr) {
-                p->output();
-            }
-        }
-
-        cout << "\nJumlah Transaksi : " << parkir.size() << endl;
-        cout << "====================================" << endl;
+        cout << "Jumlah data parkir: " << jumlah << endl;
     }
 };
 
 // ==================== CLASS MENU ====================
-
 class Menu {
 private:
     DataParkir dataParkir;
 
-public:
-    void run() {
-        cout << "====================================" << endl;
-        cout << "       SISTEM PARKIR GEDUNG" << endl;
-        cout << "====================================" << endl;
+    shared_ptr<Kendaraan> inputKendaraan() {
+        int pilihan;
+        cout << "\nJenis Kendaraan:\n";
+        cout << "1. Mobil\n";
+        cout << "2. Truk\n";
+        cout << "3. Motor\n";
+        cout << "Pilihan: ";
+        cin >> pilihan;
 
-        int jumlah;
+        string plat;
+        cout << "Nomor Plat: ";
+        cin >> ws;
+        getline(cin, plat);
 
-        cout << "Jumlah data parkir: ";
-        cin >> jumlah;
+        switch (pilihan) {
+            case 1: return make_shared<Mobil>(plat);
+            case 2: return make_shared<Truk>(plat);
+            case 3: return make_shared<Motor>(plat);
+            default:
+                cout << "Jenis kendaraan tidak valid.\n";
+                return nullptr;
+        }
+    }
 
-        if (jumlah < 1) {
-            cout << "Jumlah harus lebih dari 0." << endl;
+    void inputData(string lokasi) {
+        int jumlahInput;
+        cout << "\nJumlah data parkir: ";
+        cin >> jumlahInput;
+
+        if (jumlahInput < 1) {
+            cout << "Jumlah harus lebih dari 0.\n";
             return;
         }
 
-        for (int i = 0; i < jumlah; i++) {
+        vector<Parkir> dataBaru;
+
+        for (int i = 0; i < jumlahInput; i++) {
             cout << "\nData Parkir ke-" << i + 1 << endl;
 
-            string kode;
-            cout << "Kode parkir    : ";
+            string kode, nama, alamat, nip, tanggal;
+            int pilihanPengguna;
+
+            cout << "Kode Parkir: ";
             cin >> ws;
             getline(cin, kode);
 
-            int pilihanLokasi;
-            cout << "Lokasi parkir (1. Dalam / 2. Luar): ";
-            cin >> pilihanLokasi;
+            cout << "Nama: ";
+            getline(cin, nama);
 
-            if (pilihanLokasi != 1 && pilihanLokasi != 2) {
-                cout << "Lokasi tidak valid. Data dilewati." << endl;
-                continue;
-            }
+            cout << "Alamat: ";
+            getline(cin, alamat);
 
-            string lokasi = pilihanLokasi == 2 ? "Luar" : "Dalam";
-
-            int pilihanPengguna;
-            cout << "Jenis pengguna (1. Umum / 2. Pegawai): ";
+            cout << "Pengguna (1. Umum / 2. Pegawai): ";
             cin >> pilihanPengguna;
 
             if (pilihanPengguna != 1 && pilihanPengguna != 2) {
-                cout << "Jenis pengguna tidak valid." << endl;
+                cout << "Pilihan pengguna tidak valid. Data dilewati.\n";
                 continue;
             }
 
             bool pegawai = pilihanPengguna == 2;
-
-            string nama, alamat, nip = "-";
-
-            cout << "Nama           : ";
-            cin >> ws;
-            getline(cin, nama);
-
-            cout << "Alamat         : ";
-            getline(cin, alamat);
+            nip = "";
 
             if (pegawai) {
-                cout << "NIP            : ";
+                cout << "NIP: ";
+                cin >> ws;
                 getline(cin, nip);
             }
 
-            int jenis;
-            cout << "Jenis kendaraan (1. Mobil / 2. Truk / 3. Motor): ";
-            cin >> jenis;
+            shared_ptr<Kendaraan> kendaraan = inputKendaraan();
 
-            if (jenis < 1 || jenis > 3) {
-                cout << "Jenis kendaraan tidak valid." << endl;
+            if (kendaraan == nullptr) {
+                cout << "Data dilewati.\n";
                 continue;
             }
 
-            string plat;
-            cout << "Nomor plat     : ";
-            cin >> ws;
-            getline(cin, plat);
+            cout << "Tanggal (YYYY-MM-DD): ";
+            cin >> tanggal;
 
-            string teksTanggal;
-            cout << "Tanggal parkir (YYYY-MM-DD): ";
-            getline(cin, teksTanggal);
+            Waktu waktuMasuk, lamaParkir;
 
-            Tanggal tanggal = Tanggal::input(teksTanggal);
-
-            cout << "\nMasukkan waktu masuk:" << endl;
-            Waktu waktuMasuk;
+            cout << "\nWaktu Masuk\n";
             waktuMasuk.inputWaktu();
 
-            cout << "\nMasukkan lama parkir:" << endl;
-            Waktu lamaParkir;
+            cout << "\nLama Parkir\n";
             lamaParkir.inputWaktu();
 
-            if (waktuMasuk.getJam() < 0 ||
+            if (!waktuMasuk.valid() ||
                 waktuMasuk.getJam() > 23 ||
-                waktuMasuk.getMenit() < 0 ||
                 waktuMasuk.getMenit() > 59 ||
-                waktuMasuk.getDetik() < 0 ||
                 waktuMasuk.getDetik() > 59) {
-
-                cout << "Waktu masuk tidak valid." << endl;
+                cout << "Waktu masuk tidak valid. Data dilewati.\n";
                 continue;
             }
 
-            if (lamaParkir.getJam() < 0 ||
-                lamaParkir.getMenit() < 0 ||
-                lamaParkir.getMenit() > 59 ||
-                lamaParkir.getDetik() < 0 ||
-                lamaParkir.getDetik() > 59 ||
+            if (!lamaParkir.valid() ||
+                lamaParkir.getJam() < 0 ||
                 lamaParkir.toSecond() < 1) {
-
-                cout << "Durasi parkir tidak valid." << endl;
+                cout << "Lama parkir tidak valid. Data dilewati.\n";
                 continue;
             }
 
-            Kendaraan* kendaraan = nullptr;
+            int kunjungan = 1;
 
-            switch (jenis) {
-                case 1:
-                    kendaraan = new Mobil(plat);
-                    break;
-                case 2:
-                    kendaraan = new Truk(plat);
-                    break;
-                case 3:
-                    kendaraan = new Motor(plat);
-                    break;
+            if (!pegawai) {
+                string plat = kendaraan->getNomorPlat();
+
+                for (int j = 0; j < (int)dataBaru.size(); j++) {
+                    string platLama =
+                        dataBaru[j].getKendaraan()->getNomorPlat();
+
+                    transform(plat.begin(), plat.end(),
+                              plat.begin(), ::tolower);
+                    transform(platLama.begin(), platLama.end(),
+                              platLama.begin(), ::tolower);
+
+                    if (!dataBaru[j].isPegawai() &&
+                        plat == platLama &&
+                        dataBaru[j].getTanggal().substr(0, 4) ==
+                        tanggal.substr(0, 4) &&
+                        mingguKe(dataBaru[j].getTanggal()) ==
+                        mingguKe(tanggal)) {
+                        kunjungan++;
+                    }
+                }
+
+                kunjungan += dataParkir.hitungKunjunganMinggu(
+                    kendaraan->getNomorPlat(), tanggal) - 1;
             }
 
             Person person(nama, alamat);
 
-            int kunjunganSebelumnya = 0;
+            Parkir data(kode, person, kendaraan, pegawai,
+                        nip, tanggal, waktuMasuk,
+                        lamaParkir, kunjungan);
 
-            if (!pegawai) {
-                kunjunganSebelumnya =
-                    dataParkir.hitungKunjunganMinggu(plat, tanggal);
-            }
-
-            int kunjunganSaatIni =
-                pegawai ? 0 : kunjunganSebelumnya + 1;
-
-            Parkir* data = new Parkir(
-                kode, person, kendaraan, pegawai, nip,
-                tanggal, waktuMasuk, lamaParkir,
-                kunjunganSaatIni, lokasi
-            );
-
-            dataParkir.tambah(data);
+            data.setLokasi(lokasi);
+            dataBaru.push_back(data);
         }
 
+        vector<Parkir> gabungan = dataParkir.getParkir();
+        gabungan.insert(gabungan.end(), dataBaru.begin(), dataBaru.end());
+
+        dataParkir.setParkir(gabungan);
+    }
+
+public:
+    // Constructor Menu
+    Menu() {
+        dataParkir = DataParkir();
+    }
+
+    // Input parkir dalam gedung
+    void inputDalam() {
+        cout << "\n===== INPUT PARKIR DALAM GEDUNG =====\n";
+        inputData("Dalam");
+    }
+
+    // Input parkir luar gedung
+    void inputLuar() {
+        cout << "\n===== INPUT PARKIR LUAR GEDUNG =====\n";
+        inputData("Luar");
+    }
+
+    // Menampilkan laporan parkir
+    void lihatLaporan() {
         dataParkir.output();
+    }
+
+    // Menjalankan menu utama
+    void run() {
+        int pilihan;
+
+        do {
+            cout << "\n================================\n";
+            cout << "       SISTEM PARKIR GEDUNG\n";
+            cout << "================================\n";
+            cout << "1. Input Parkir Dalam\n";
+            cout << "2. Input Parkir Luar\n";
+            cout << "3. Lihat Laporan Parkir\n";
+            cout << "4. Keluar\n";
+            cout << "Pilihan: ";
+            cin >> pilihan;
+
+            switch (pilihan) {
+                case 1:
+                    inputDalam();
+                    break;
+                case 2:
+                    inputLuar();
+                    break;
+                case 3:
+                    lihatLaporan();
+                    break;
+                case 4:
+                    cout << "Terima kasih.\n";
+                    break;
+                default:
+                    cout << "Pilihan tidak valid.\n";
+            }
+        } while (pilihan != 4);
     }
 };
 
-// ==================== MAIN PROGRAM ====================
-
+// ==================== MAIN ====================
 int main() {
     Menu menu;
     menu.run();
-
     return 0;
 }
 
