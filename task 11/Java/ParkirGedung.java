@@ -4,9 +4,7 @@ Nama NPM Anggota 1  : Jasmine Salsabila (140810250017)
 Nama NPM Anggota 2  : Raffa Pasha Hidayat (140810250043)
 Nama NPM Anggota 3  : Asma Hamidah (140810250053)
 Tanggal Pengerjaan  : 10 November 2026
-Deskripsi           : Program OOP Array of Object untuk mencari gaji
-                      harian dan lembur pegawai berdasarkan lama kerja,
-                      lengkap dengan status peringatan.
+Deskripsi           : Program Sistem Parkir Gedung merupakan program berbasis Java yang digunakan untuk mengelola data parkir kendaraan, baik untuk pengguna umum maupun pegawai. Program ini mencatat identitas pengguna, jenis kendaraan, lokasi parkir, tanggal dan waktu masuk, serta durasi parkir. Biaya parkir dihitung berdasarkan jenis kendaraan, status pengguna, dan lama parkir, dengan penerapan diskon bagi pengguna umum sesuai ketentuan kunjungan. Program ini menerapkan konsep OOP, meliputi encapsulation, inheritance, polymorphism, abstraction, dan composition.
 */
 
 import java.time.DayOfWeek;
@@ -176,9 +174,6 @@ class Motor extends Kendaraan {
     }
 }
 
-// ==========================================
-// CLASS PARKIR
-// ==========================================
 class Parkir {
     private String kode;
     private Person person;
