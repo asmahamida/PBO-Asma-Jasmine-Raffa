@@ -112,7 +112,7 @@ class Person {
 
     public String getAlamat() {
         return alamat;
-    }
+    } 
 
     public void inputPerson(Scanner sc){
         System.out.print("Nama          : ");
