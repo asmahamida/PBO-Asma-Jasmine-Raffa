@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
+// ==================== CLASS WAKTU ====================
 
 class Waktu {
     private int jam;
@@ -62,6 +63,8 @@ class Waktu {
     }
 }
 
+// ==================== CLASS PERSON ====================
+
 class Person {
     private String nama;
     private String alamat;
@@ -84,6 +87,8 @@ class Person {
         System.out.println("Alamat         : " + alamat);
     }
 }
+
+// ==================== CLASS KENDARAAN ====================
 
 abstract class Kendaraan {
     protected String nomorPlat;
@@ -111,6 +116,8 @@ abstract class Kendaraan {
     }
 }
 
+// ==================== CLASS MOBIL ====================
+
 class Mobil extends Kendaraan {
     public Mobil(String nomorPlat) {
         super(nomorPlat);
@@ -131,6 +138,8 @@ class Mobil extends Kendaraan {
         return "Mobil";
     }
 }
+
+// ==================== CLASS TRUK ====================
 
 class Truk extends Kendaraan {
     public Truk(String nomorPlat) {
@@ -153,6 +162,8 @@ class Truk extends Kendaraan {
     }
 }
 
+// ==================== CLASS MOTOR ====================
+
 class Motor extends Kendaraan {
     public Motor(String nomorPlat) {
         super(nomorPlat);
@@ -173,6 +184,8 @@ class Motor extends Kendaraan {
         return "Motor";
     }
 }
+
+// ==================== CLASS PARKIR ====================
 
 class Parkir {
     private String kode;
@@ -306,6 +319,8 @@ class Parkir {
     }
 }
 
+// ==================== CLASS DATA PARKIR ====================
+
 class DataParkir {
     private Parkir[] parkir;
     private int jumlah;
@@ -328,8 +343,9 @@ class DataParkir {
         this.jumlah = jumlah;
     }
 
-    public int hitungKunjunganMinggu(String plat,
-                                      LocalDate tanggal) {
+    public int hitungKunjunganMinggu(
+        String plat, LocalDate tanggal
+    ) {
         int total = 0;
 
         LocalDate awal = tanggal.with(DayOfWeek.MONDAY);
@@ -370,6 +386,8 @@ class DataParkir {
         System.out.println("====================================");
     }
 }
+
+// ==================== CLASS MENU ====================
 
 class Menu {
     private Scanner sc;
@@ -434,7 +452,9 @@ class Menu {
                 nip = sc.nextLine().trim();
             }
 
-            System.out.print("Jenis kendaraan (1. Mobil / 2. Truk / 3. Motor): ");
+            System.out.print(
+                "Jenis kendaraan (1. Mobil / 2. Truk / 3. Motor): "
+            );
             int jenis = Integer.parseInt(sc.nextLine().trim());
 
             if (jenis < 1 || jenis > 3) {
@@ -562,6 +582,8 @@ class Menu {
         dataParkir.output();
     }
 }
+
+// ==================== MAIN PROGRAM ====================
 
 public class ParkirGedung {
     public static void main(String[] args) {

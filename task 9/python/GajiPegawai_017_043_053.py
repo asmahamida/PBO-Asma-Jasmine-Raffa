@@ -8,6 +8,7 @@
 #                       lengkap dengan status peringatan.
 
 class Waktu:
+    # Constructor
     def __init__(self, jam=0, menit=0, detik=0):
         self._jam = jam
         self._menit = menit
@@ -82,6 +83,7 @@ class Person:
         print("Alamat        :", self._alamat)
 
 
+# extends, child class
 class Pegawai(Person):
     def __init__(self, nip="", nama="", alamat="", gol=0, datang=None, pulang=None):
         super().__init__(nama, alamat)
